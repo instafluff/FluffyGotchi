@@ -1,0 +1,151 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+	<div id="fluffinko"></div>
+	<script>
+		var config = {
+			type: Phaser.AUTO,
+			width: 800,
+			height: 800,
+    	// transparent: true,
+			backgroundColor: "#333333",
+			parent: 'fluffinko',
+			physics: {
+					default: 'arcade',
+					arcade: {
+							// debug: true,
+							gravity: { y: 200 }
+					}
+			},
+			scene: {
+					preload: preload,
+					create: create,
+					update: update
+			}
+		};
+
+		var game = new Phaser.Game(config);
+		var phaser = undefined;
+		var refreshTimer = null;
+		var traits = {};
+
+		function preload ()
+		{
+			this.load.image('wizball', 'images/pika.png');
+			this.load.image('peg', 'images/peg.png');
+			this.load.image('wall', 'images/wall.png');
+			this.load.image('star', 'images/star.png');
+		}
+
+		function create ()
+		{
+			phaser = this;
+			this.game.antialias = true;
+			this.game.clearBeforeRender = true;
+
+			traits[ "fluff" ] = Math.random();
+			traits[ "spiky" ] = Math.random();
+			traits[ "plump_head" ] = Math.random();
+			traits[ "plump_body" ] = Math.random();
+			traits[ "height" ] = Math.random();
+			traits[ "arm_length" ] = Math.random();
+			traits[ "leg_length" ] = Math.random();
+			traits[ "color_r" ] = Math.random();
+			traits[ "color_g" ] = Math.random();
+			traits[ "color_b" ] = Math.random();
+			traits[ "color2_r" ] = Math.random();
+			traits[ "color2_g" ] = Math.random();
+			traits[ "color2_b" ] = Math.random();
+			traits[ "freckles" ] = Math.random();
+			traits[ "antennae" ] = Math.random();
+			traits[ "wings" ] = Math.random();
+			traits[ "fourlegged" ] = Math.random();
+			console.log( traits );
+
+			var color = new Phaser.Display.Color( traits[ "color_r" ] * 255, traits[ "color_g" ] * 255, traits[ "color_b" ] * 255 );
+			var color2 = new Phaser.Display.Color( traits[ "color2_r" ] * 255, traits[ "color2_g" ] * 255, traits[ "color2_b" ] * 255 );
+			var hasFreckles = traits[ "freckles" ] > 0.5;
+			var hasAntennae = traits[ "antennae" ] > 0.5;
+			var hasWings = traits[ "wings" ] > 0.5;
+			var headwidth = 50 + traits[ "plump_head" ] * 50;
+			var width = 50 + traits[ "plump_body" ] * 150;
+			var height = 50 + traits[ "height" ] * 150;
+			var armlength = 40 + traits[ "arm_length" ] * 80;
+			var leglength = 10 + traits[ "leg_length" ] * 100;
+			var antlength = 10 + traits[ "antennae" ] + 30;
+			if( hasWings ) {
+				this.add.circle( 400 - width, 300 - height / 2 - 15, width / 3 + 5, color2.color );
+				this.add.circle( 400 - width, 300 - height / 2 + 10, width / 3, color2.color );
+				this.add.circle( 400, 300 - height / 2 - 15, width / 3 + 5, color2.color );
+				this.add.circle( 400, 300 - height / 2 + 10, width / 3, color2.color );
+			}
+			// Head, Torso, Legs, Arms, Eyes, Ears, Mouth
+			// this.add.circle( 400 - width / 2, 300 - height / 2, width, height, color.color );
+			var head = this.add.ellipse( 400 - width / 2, 300 - height, headwidth, headwidth, color.color );
+			var torso = this.add.ellipse( 400 - width / 2, 300 - height / 2, width, height, color.color );
+			var lLeg = this.add.ellipse( 400 - width / 2 - width * 0.1, 300, 5, leglength, color.color );
+			var rLeg = this.add.ellipse( 400 - width / 2 + width * 0.1, 300, 5, leglength, color.color );
+			lLeg.angle = 10;
+			rLeg.angle = -10;
+			var lArm = this.add.ellipse( 400 - width / 2 - width * 0.35, 300 - height + headwidth * 0.5, armlength, 3, color.color );
+			var rArm = this.add.ellipse( 400 - width / 2 + width * 0.35, 300 - height + headwidth * 0.5, armlength, 3, color.color );
+			lArm.angle = 10;
+			rArm.angle = -10;
+
+			if( hasAntennae ) {
+				var lAnt = this.add.ellipse( 400 - width / 2 - headwidth * 0.1, 300 - height * 1.2, 2, antlength, color.color );
+				var rAnt = this.add.ellipse( 400 - width / 2 + headwidth * 0.1, 300 - height * 1.2, 2, antlength, color.color );
+				lAnt.angle = -10;
+				rAnt.angle = 10;
+			}
+			// body.angle = 60;
+			// console.log(torso);
+			// if( hasFreckles ) {
+			// 	const maxFreckleSize = 4;
+			// 	for( var i = 0; i < 30; i++ ) {
+			// 		var x = 400 - width + maxFreckleSize / 2 + getRandomInt( width - maxFreckleSize );
+			// 		var y = 300 - height + maxFreckleSize / 2 + getRandomInt( height - maxFreckleSize );
+			// 		this.add.circle( x, y, maxFreckleSize / 2, color2.color );
+			// 	}
+			// }
+		}
+
+		function update() {
+		}
+
+		function startGame() {
+		}
+
+		function getRandomInt(max) {
+		  return Math.floor(Math.random() * Math.floor(max));
+		}
+
+		var client = null;
+
+		$( document ).ready(function() {
+			// $("#fluffinko").hide();
+
+			var options = {
+				options: {
+					debug: false
+				},
+				connection: {
+					reconnect: true,
+				},
+				identity: {
+					username: "{{ username }}",
+				    password: "{{ oauth }}"
+				},
+				channels: ["#{{ username }}"]
+			};
+
+			client = new tmi.client(options);
+
+			// Connect the client to the server..
+			client.connect();
+
+			client.on("chat", function (channel, userstate, message, self) {
+			});
+		});
+	</script>
+{% endblock %}
